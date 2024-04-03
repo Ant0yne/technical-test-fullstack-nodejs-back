@@ -6,6 +6,7 @@ const mongoose = require("mongoose");
 // ROUTES
 const comicsRoutes = require("./routes/comics");
 const charactersRoutes = require("./routes/characters");
+const usersRoutes = require("./routes/users");
 
 // A try catch to contact the DDB
 mongoose
@@ -16,6 +17,7 @@ mongoose
 		app.use(express.json());
 		app.use(comicsRoutes);
 		app.use(charactersRoutes);
+		app.use(usersRoutes);
 
 		app.all("/", (req, res) => {
 			res.status(200).json({
