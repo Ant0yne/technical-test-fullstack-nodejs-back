@@ -69,9 +69,7 @@ router.get("/comic/:comicId", async (req, res) => {
 	try {
 		const comicId = req.params.comicId;
 
-		console.log(
-			process.env.URL_API + "/comic/" + comicId + process.env.MARV_API_KEY
-		);
+		// Check if the ID format is valid
 		if (mongoose.isObjectIdOrHexString(comicId) === false) {
 			return res.status(400).json({
 				message: "Please use a valid Id.",
