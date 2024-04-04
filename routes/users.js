@@ -4,9 +4,23 @@ const express = require("express");
 const axios = require("axios");
 const mongoose = require("mongoose");
 const fileUpload = require("express-fileupload");
+const cloudinary = require("cloudinary").v2;
 const SHA256 = require("crypto-js/sha256");
 const encBase64 = require("crypto-js/enc-base64");
 const uid2 = require("uid2");
+
+cloudinary.config({
+	cloud_name: process.env.CLOUD_NAME,
+	api_key: process.env.CLOUD_API_KEY,
+	api_secret: process.env.CLOUD_API_SECRET,
+});
+
+// Image buffer to base 64 for Cloudinary
+const convertToBase64 = (file) => {
+	return `data:${file.mimetype};base64,${file.data.toString("base64")}`;
+};
+// The path to move the image for this project on Cloudinary
+const avatarFolderRootPath = "Marvel/avatar";
 
 //MODELS
 const User = require("../models/User");
@@ -22,8 +36,6 @@ router.post("/user/signup", fileUpload(), async (req, res) => {
 		// The body parameters
 		const { username, email, password } = req.body;
 
-		console.log(typeof username);
-
 		// Search an user with same mail in DDB
 		const userFound = await User.findOne({ email: email });
 
@@ -38,7 +50,7 @@ router.post("/user/signup", fileUpload(), async (req, res) => {
 			typeof password !== "string"
 		) {
 			return res.status(400).json({
-				message: "Missing parameters",
+				message: "Missing valid parameters",
 			});
 			// not an email format
 		} else if (
@@ -68,6 +80,29 @@ router.post("/user/signup", fileUpload(), async (req, res) => {
 			hash: hashGenerate,
 			token: tokenGenerate,
 		});
+
+		// Check if there is an avatar picture
+		// If there is create it, move it to the right path in Cloudinary then add it to the user object in DDN
+		if (req.files) {
+			const uploadedAvatar = await cloudinary.uploader.upload(
+				convertToBase64(req.files.avatar)
+			);
+
+			// Create the new image path and name
+			const newFilePublicId = `${avatarFolderRootPath}/${newUser._id}/${uploadedAvatar.public_id}`;
+
+			// Create the folder if it doesn't exist
+			await cloudinary.api.create_folder(
+				`${avatarFolderRootPath}/${newUser._id}`
+			);
+
+			// Move and rename the file
+			const avatarFiled = await cloudinary.uploader.rename(
+				uploadedAvatar.public_id,
+				newFilePublicId
+			);
+			newUser.account.avatar = avatarFiled;
+		}
 
 		await newUser.save();
 
@@ -99,7 +134,7 @@ router.put("/user/login", fileUpload(), async (req, res) => {
 			typeof password !== "string"
 		) {
 			return res.status(400).json({
-				message: "User not found",
+				message: "Missing valid parameters",
 			});
 			// User not found in DDB
 		} else if (userFound === null) {
