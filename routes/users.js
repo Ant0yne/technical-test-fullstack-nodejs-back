@@ -139,6 +139,18 @@ router.post("/user/signup", fileUpload(), async (req, res) => {
 	}
 });
 
+// Retreive favorites Comics and Characters ---------------------------------------------------------------------------------------------------------
+router.get("/user/fav", isAuthenticated, fileUpload(), async (req, res) => {
+	try {
+		return res.status(200).json({
+			favComics: req.user.favComics,
+			favCharacters: req.user.favCharacters,
+		});
+	} catch (error) {
+		return res.status(500).json({ message: error.message });
+	}
+});
+
 // Login to the website ---------------------------------------------------------------------------------------------------------
 router.put("/user/login", fileUpload(), async (req, res) => {
 	try {
