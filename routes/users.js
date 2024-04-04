@@ -131,6 +131,8 @@ router.post("/user/signup", fileUpload(), async (req, res) => {
 			message: `Your Marvel account was successfully created ${username}. You can now use your email ${email} to login.`,
 			token: newUser.token,
 			id: newUser._id,
+			favComics: newUser.favComics,
+			favCharacters: newUser.favCharacters,
 		});
 	} catch (error) {
 		return res.status(500).json({ message: error.message });
