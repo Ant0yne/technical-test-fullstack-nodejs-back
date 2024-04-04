@@ -203,38 +203,51 @@ router.put("/user/login", fileUpload(), async (req, res) => {
 	}
 });
 
-// Add a comic/character to fav ---------------------------------------------------------------------------------------------------------
-router.put("/user/fav", isAuthenticated, fileUpload(), async (req, res) => {
+// modify the favorites Comics or Characters ---------------------------------------------------------------------------------------------------------
+router.put("/user/fav", fileUpload(), async (req, res) => {
 	try {
 		// The body parameters
-		const { comicFav, characterFav } = req.body;
+		const { favComics, favCharacters, token } = req.body;
 
-		// Conditions of errors
-		// At leat one favorite list and type Array
+		// Search for user with same token in DDB
+		const userFound = await User.findOne({
+			token: token,
+		});
+
+		// If there is none -> error
+		if (userFound === null) {
+			return res.status(401).json({ error: "Unauthorized to do this action." });
+		}
+
+		//Conditions of errors
+		//At leat one favorite list and type Array
 		if (
-			(!comicFav && !characterFav) ||
-			(comicFav && !Array.isArray(comicFav)) ||
-			(characterFav && !Array.isArray(characterFav))
+			(!favComics && !favCharacters) ||
+			(favComics && !Array.isArray(favComics)) ||
+			(favCharacters && !Array.isArray(favCharacters))
 		) {
 			return res.status(400).json({
 				message: "No valid favorite list",
 			});
 		}
 
-		if (comicFav) {
-			const temp = [...comicFav];
-			req.user.favComics = temp;
+		if (favComics) {
+			// Replace the fav comics with the one sent in body
+			const temp = [...favComics];
+			userFound.favComics = temp;
 
-			await req.user.save();
+			await userFound.save();
 
-			return res.status(200).json(req.user.favComics);
-		} else if (characterFav) {
-			const temp = [...characterFav];
-			req.user.favCharacters = temp;
+			return res.status(200).json(userFound.favComics);
+		} else if (favCharacters) {
+			// Replace the fav characters with the one sent in body
 
-			await req.user.save();
+			const temp = [...favCharacters];
+			userFound.favCharacters = temp;
 
-			return res.status(200).json(req.user.favCharacters);
+			await userFound.save();
+
+			return res.status(200).json(userFound.favCharacters);
 		} else {
 			return res.status(400).json({ message: "No favorite list to update" });
 		}
