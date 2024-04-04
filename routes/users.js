@@ -84,8 +84,29 @@ router.post("/user/signup", fileUpload(), async (req, res) => {
 		// Check if there is an avatar picture
 		// If there is create it, move it to the right path in Cloudinary then add it to the user object in DDN
 		if (req.files) {
+			console.log("1");
 			const uploadedAvatar = await cloudinary.uploader.upload(
 				convertToBase64(req.files.avatar)
+			);
+
+			// Create the new image path and name
+			const newFilePublicId = `${avatarFolderRootPath}/${newUser._id}/${uploadedAvatar.public_id}`;
+
+			// Create the folder if it doesn't exist
+			await cloudinary.api.create_folder(
+				`${avatarFolderRootPath}/${newUser._id}`
+			);
+
+			// Move and rename the file
+			const avatarFiled = await cloudinary.uploader.rename(
+				uploadedAvatar.public_id,
+				newFilePublicId
+			);
+			newUser.account.avatar = avatarFiled;
+		} else {
+			console.log("2");
+			const uploadedAvatar = await cloudinary.uploader.upload(
+				"https://res.cloudinary.com/dxyptix0d/image/upload/v1712224459/marvel/avatar/lhavkiiyduukzinoh5o4.png"
 			);
 
 			// Create the new image path and name
