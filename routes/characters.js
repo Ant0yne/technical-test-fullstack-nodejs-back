@@ -17,8 +17,6 @@ router.get("/characters", async (req, res) => {
 	// Remove the possible between word to add %20 (better for HTTP query)
 	name && (nameWOSpace = name.replace(" ", "%20"));
 
-	console.log(nameWOSpace);
-
 	// Conditions of errors
 	// if wrong type of query
 	if (

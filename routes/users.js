@@ -84,7 +84,6 @@ router.post("/user/signup", fileUpload(), async (req, res) => {
 		// Check if there is an avatar picture
 		// If there is create it, move it to the right path in Cloudinary then add it to the user object in DDN
 		if (req.files) {
-			console.log("1");
 			const uploadedAvatar = await cloudinary.uploader.upload(
 				convertToBase64(req.files.avatar)
 			);
@@ -104,7 +103,6 @@ router.post("/user/signup", fileUpload(), async (req, res) => {
 			);
 			newUser.account.avatar = avatarFiled;
 		} else {
-			console.log("2");
 			const uploadedAvatar = await cloudinary.uploader.upload(
 				"https://res.cloudinary.com/dxyptix0d/image/upload/v1712224459/marvel/avatar/lhavkiiyduukzinoh5o4.png"
 			);
@@ -143,8 +141,14 @@ router.post("/user/signup", fileUpload(), async (req, res) => {
 router.get("/user/fav", isAuthenticated, fileUpload(), async (req, res) => {
 	try {
 		return res.status(200).json({
-			favComics: req.user.favComics,
+			token: req.user.token,
+			account: {
+				username: req.user.account.username,
+				avatar: req.user.account.avatar,
+			},
+			id: req.user._id,
 			favCharacters: req.user.favCharacters,
+			favComics: req.user.favComics,
 		});
 	} catch (error) {
 		return res.status(500).json({ message: error.message });
@@ -188,7 +192,10 @@ router.put("/user/login", fileUpload(), async (req, res) => {
 			// Send the token for cookie
 			const result = {
 				token: userFound.token,
-				account: { username: userFound.account.username },
+				account: {
+					username: userFound.account.username,
+					avatar: userFound.account.avatar,
+				},
 				id: userFound._id,
 				favCharacters: userFound.favCharacters,
 				favComics: userFound.favComics,
