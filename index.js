@@ -2,11 +2,19 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
+const cloudinary = require("cloudinary").v2;
 
 // ROUTES
 const comicsRoutes = require("./routes/comics");
 const charactersRoutes = require("./routes/characters");
 const usersRoutes = require("./routes/users");
+
+// init Cloudinary
+cloudinary.config({
+	cloud_name: process.env.CLOUD_NAME,
+	api_key: process.env.CLOUD_API_KEY,
+	api_secret: process.env.CLOUD_API_SECRET,
+});
 
 // A try catch to contact the DDB
 mongoose
@@ -21,8 +29,7 @@ mongoose
 
 		app.all("/", (req, res) => {
 			res.status(200).json({
-				message:
-					"Bienvenue sur ce Test Technique Fullstack ! Tout sur Marvel !",
+				message: "Welcome to the Marvel Technical Test!",
 			});
 		});
 
@@ -31,7 +38,7 @@ mongoose
 		});
 
 		app.listen(process.env.PORT, () => {
-			console.log("SERVER ON");
+			console.log("SERVER ON 🔥🔥🔥");
 		});
 	})
 	.catch((error) => {
