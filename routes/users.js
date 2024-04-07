@@ -211,20 +211,10 @@ router.put("/user/login", fileUpload(), async (req, res) => {
 });
 
 // modify the favorites Comics or Characters ---------------------------------------------------------------------------------------------------------
-router.put("/user/fav", fileUpload(), async (req, res) => {
+router.put("/user/fav", isAuthenticated, fileUpload(), async (req, res) => {
 	try {
 		// The body parameters
-		const { favComics, favCharacters, token } = req.body;
-
-		// Search for user with same token in DDB
-		const userFound = await User.findOne({
-			token: token,
-		});
-
-		// If there is none -> error
-		if (userFound === null) {
-			return res.status(401).json({ error: "Unauthorized to do this action." });
-		}
+		const { favComics, favCharacters } = req.body;
 
 		//Conditions of errors
 		//At leat one favorite list and type Array
@@ -241,20 +231,20 @@ router.put("/user/fav", fileUpload(), async (req, res) => {
 		if (favComics) {
 			// Replace the fav comics with the one sent in body
 			const temp = [...favComics];
-			userFound.favComics = temp;
+			req.user.favComics = temp;
 
-			await userFound.save();
+			await req.user.save();
 
-			return res.status(200).json(userFound.favComics);
+			return res.status(200).json(req.user.favComics);
 		} else if (favCharacters) {
 			// Replace the fav characters with the one sent in body
 
 			const temp = [...favCharacters];
-			userFound.favCharacters = temp;
+			req.user.favCharacters = temp;
 
-			await userFound.save();
+			await req.user.save();
 
-			return res.status(200).json(userFound.favCharacters);
+			return res.status(200).json(req.user.favCharacters);
 		} else {
 			return res.status(400).json({ message: "No favorite list to update" });
 		}
