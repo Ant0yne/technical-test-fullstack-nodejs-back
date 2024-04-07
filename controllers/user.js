@@ -1,3 +1,5 @@
+"use strict";
+
 //MODELS
 const User = require("../models/User");
 

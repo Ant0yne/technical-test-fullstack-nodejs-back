@@ -5,7 +5,7 @@ const express = require("express");
 const axios = require("axios");
 const fileUpload = require("express-fileupload");
 
-// All the user controllers
+// CONTROLLERS
 const {
 	modifyFavUser,
 	loginUser,
@@ -13,6 +13,7 @@ const {
 	createUser,
 } = require("../controllers/user");
 
+// MIDDLEWARES
 // check user's token to authenticate them
 const isAuthenticated = require("../middlewares/isAuthenticated");
 
