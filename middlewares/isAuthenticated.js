@@ -11,7 +11,7 @@ const isAuthenticated = async (req, res, next) => {
 		if (!user) {
 			return res.status(401).json({ error: "Unauthorized to do this action." });
 		} else {
-			// Return the user's info from DDB
+			// If there is return the user's info from DDB
 			req.user = user;
 			return next();
 		}
